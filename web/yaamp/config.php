@@ -38,8 +38,8 @@ return array(
 			'routes'=>array(
 				array(
 					'class'=>'CFileLogRoute',
-					'levels'=>'error, warning',
-//					'levels'=>'debug, trace, error, warning',
+//					'levels'=>'error, warning',
+					'levels'=>'debug, trace, error, warning',
 				),
 //				array(
 //					'class'=>'CProfileLogRoute',
@@ -65,17 +65,21 @@ return array(
 			'schemaCachingDuration'=>3600,
 		),
 
-		'cache'=>array(
-			'class'=>'CMemCache',
-			'keyPrefix'=>'',
-			'servers'=>array(
-				array(
-					'host'=>'127.0.0.1',
-					'port'=> 11211,
-					'weight'=> 60,
-				),
-			),
-		),
+//		'cache'=>array(
+//			'class'=>'CMemCache',
+//			'keyPrefix'=>'',
+//			'servers'=>array(
+//				array(
+//					'host'=>'127.0.0.1',
+//					'port'=> 11211,
+//					'weight'=> 60,
+//				),
+//			),
+		//		),
+//		'cache'=>array(
+//			'class'=>'yii\caching\FileCache',
+
+//		),
 
 	),
 

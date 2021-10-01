@@ -22,7 +22,7 @@ function BackendCoinsUpdate()
 {
 	$debug = false;
 
-//	debuglog(__FUNCTION__);
+	debuglog(__FUNCTION__);
 	$t1 = microtime(true);
 
 	$pool_rate = array();
@@ -32,7 +32,7 @@ function BackendCoinsUpdate()
 	$coins = getdbolist('db_coins', "installed");
 	foreach($coins as $coin)
 	{
-//		debuglog("doing $coin->name");
+		debuglog("doing $coin->name");
 
 		$remote = new WalletRPC($coin);
 

@@ -67,13 +67,34 @@ void coind_sort()
 
 bool coind_can_mine(YAAMP_COIND *coind, bool isaux)
 {
-	if(coind->deleted) return false;
-	if(!coind->enable) return false;
-	if(!coind->auto_ready) return false;
-	if(!rpc_connected(&coind->rpc)) return false;
-	if(!coind->height) return false;
-	if(!coind->difficulty) return false;
-	if(coind->isaux != isaux) return false;
+	if(coind->deleted) {
+		stratumlog("coind deleted.\n");
+		return false;
+	}
+	if(!coind->enable) {
+		stratumlog("coind disabled.\n");
+		return false;
+	}
+	if(!coind->auto_ready) {
+		stratumlog("coind not autoready.\n");
+		return false;
+	}
+	if(!rpc_connected(&coind->rpc)) {
+		stratumlog("coind not rpc connected.\n");
+		return false;
+	}
+	if(!coind->height) {
+		stratumlog("%s coind height=%d\n", coind->symbol, coind->height); 
+		return false;
+	}
+	if(!coind->difficulty) {
+		stratumlog("%s difficulty is 0, can`t mine.");
+		return false;
+	}
+	if(coind->isaux != isaux) {
+		stratumlog("%s is aux, can`t mine\n", coind->symbol);
+		return false;
+	}
 //	if(isaux && !coind->aux.chainid) return false;
 
 	return true;
@@ -132,7 +153,8 @@ bool coind_validate_address(YAAMP_COIND *coind)
 	bool isvalid = getaddressinfo || json_get_bool(json_result, "isvalid");
 	if(!isvalid) stratumlog("%s wallet %s is not valid.\n", coind->name, coind->wallet);
 
-	bool ismine = json_get_bool(json_result, "ismine");
+//	bool ismine = json_get_bool(json_result, "ismine");
+	bool ismine = true;
 	if(!ismine) stratumlog("%s wallet %s is not mine.\n", coind->name, coind->wallet);
 	else isvalid = ismine;
 
@@ -181,7 +203,9 @@ void coind_init(YAAMP_COIND *coind)
 
 	sprintf(params, "[\"%s\"]", account);
 
-	json_value *json = rpc_call(&coind->rpc, "getaccountaddress", params);
+	json_value *json = rpc_call(&coind->rpc, "getaddressesbylabel", params);
+	stratumlog("getaddressesbylabel: %s\n", json->u.object.values[0].value->u.object.values[0].name);
+//	exit(0);
 	if(!json)
 	{
 		json = rpc_call(&coind->rpc, "getaddressesbyaccount", params);
@@ -196,13 +220,16 @@ void coind_init(YAAMP_COIND *coind)
 		}
 	}
 
-	if (json->u.object.values[0].value->type == json_string) {
-		strcpy(coind->wallet, json->u.object.values[0].value->u.string.ptr);
-	}
-	else {
-		strcpy(coind->wallet, "");
-		stratumlog("ERROR getaccountaddress %s\n", coind->name);
-	}
+
+                strcpy(coind->wallet, json->u.object.values[0].value->u.object.values[0].name);
+
+//	if (json->u.object.values[0].value->type == json_string) {
+//		strcpy(coind->wallet, json->u.object.values[0].value->u.string.ptr);
+//	}
+//	else {
+//		strcpy(coind->wallet, "");
+//		stratumlog("ERROR getaddressesbylabel %s\n", coind->name);
+//	}
 
 	json_value_free(json);
 

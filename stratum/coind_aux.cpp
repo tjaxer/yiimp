@@ -30,6 +30,7 @@ void coind_aux_build_auxs(YAAMP_JOB_TEMPLATE *templ)
 		{
 			YAAMP_COIND *coind = (YAAMP_COIND *)li->data;
 			if(!coind_can_mine(coind, true)) continue;
+			debuglog("add aux from %s \n", coind->symbol);
 
 			int pos = (int)(int64_t)((1103515245 * coind->aux.chainid + 1103515245 * (int64_t)12345 + 12345) % templ->auxs_size);
 			if(templ->auxs[pos])

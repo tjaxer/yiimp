@@ -328,10 +328,10 @@ int main(int argc, char **argv)
 	db_update_algos(db);
 	db_update_coinds(db);
 
-	sleep(2);
+	sleep(10);
 	job_init();
 
-//	job_signal();
+	job_signal();
 
 	////////////////////////////////////////////////
 

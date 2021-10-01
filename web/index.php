@@ -1,9 +1,9 @@
 <?php
 
-//define('YII_DEBUG', true);
+define('YII_DEBUG', true);
 
 require_once('serverconfig.php');
-require_once('yaamp/defaultconfig.php');
+//require_once('yaamp/defaultconfig.php');
 require_once('yaamp/ui/app.php');
 
 //$_SERVER['PATH_INFO'] = $_SERVER['REQUEST_URI'];

@@ -11,6 +11,8 @@
 #include <stdint.h>
 #include <string.h>
 
+#include "stratum.h"
+
 static const int8_t b58digits[] = {
 	-1,-1,-1,-1,-1,-1,-1,-1, -1,-1,-1,-1,-1,-1,-1,-1,
 	-1,-1,-1,-1,-1,-1,-1,-1, -1,-1,-1,-1,-1,-1,-1,-1,
@@ -41,12 +43,16 @@ static bool _blkmk_b58tobin(void *bin, size_t binsz, const char *b58, size_t b58
 
 	for (i = 0; i < b58sz; ++i)
 	{
-		if (b58u[i] & 0x80)
+		if (b58u[i] & 0x80) {
+			debuglog("Base58:High-bit set on invalid digit\n");
 			// High-bit set on invalid digit
 			return false;
-		if (b58digits[b58u[i]] == -1)
+		}
+		if (b58digits[b58u[i]] == -1) {
 			// Invalid base58 digit
+			debuglog("Base58:Invalid base58 digit\n");
 			return false;
+		}
 		c = b58digits[b58u[i]];
 		for (j = outisz; j--; )
 		{
@@ -54,12 +60,16 @@ static bool _blkmk_b58tobin(void *bin, size_t binsz, const char *b58, size_t b58
 			c = (t & 0x3f00000000) >> 32;
 			outi[j] = t & 0xffffffff;
 		}
-		if (c)
+		if (c) {
 			// Output number too big (carry to the next int32)
+			debuglog("Base58:Output number too big (carry to the next int32)\n");
 			return false;
-		if (outi[0] & zeromask)
+		}
+		if (outi[0] & zeromask) {
+			debuglog("Base58:Output number too big (last int32 filled too far)\n");
 			// Output number too big (last int32 filled too far)
 			return false;
+		}
 	}
 
 	j = 0;

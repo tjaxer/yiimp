@@ -38,18 +38,23 @@ void coind_getauxblock(YAAMP_COIND *coind)
 }
 
 YAAMP_JOB_TEMPLATE *coind_create_template_memorypool(YAAMP_COIND *coind)
+
 {
-	json_value *json = rpc_call(&coind->rpc, "getmemorypool");
+	char params[512] = "[{}]";
+	if(!strcmp(coind->symbol, "PPC")) strcpy(params, "[]");
+	else if(g_stratum_segwit) strcpy(params, "[{\"rules\":[\"segwit\"]}]");
+
+	json_value *json = rpc_call(&coind->rpc, "getblocktemplate", params);
 	if(!json || json->type == json_null)
 	{
-		coind_error(coind, "getmemorypool");
+		coind_error(coind, "getblocktemplate");
 		return NULL;
 	}
 
 	json_value *json_result = json_get_object(json, "result");
 	if(!json_result || json_result->type == json_null)
 	{
-		coind_error(coind, "getmemorypool");
+		coind_error(coind, "getblocktemplate");
 		json_value_free(json);
 
 		return NULL;
@@ -60,9 +65,9 @@ YAAMP_JOB_TEMPLATE *coind_create_template_memorypool(YAAMP_COIND *coind)
 
 	templ->created = time(NULL);
 	templ->value = json_get_int(json_result, "coinbasevalue");
-//	templ->height = json_get_int(json_result, "height");
+	templ->height = json_get_int(json_result, "height");
 	sprintf(templ->version, "%08x", (unsigned int)json_get_int(json_result, "version"));
-	sprintf(templ->ntime, "%08x", (unsigned int)json_get_int(json_result, "time"));
+	sprintf(templ->ntime, "%08x", (unsigned int)json_get_int(json_result, "mintime"));
 	strcpy(templ->nbits, json_get_string(json_result, "bits"));
 	strcpy(templ->prevhash_hex, json_get_string(json_result, "previousblockhash"));
 
@@ -84,7 +89,7 @@ YAAMP_JOB_TEMPLATE *coind_create_template_memorypool(YAAMP_COIND *coind)
 		return NULL;
 	}
 
-	templ->height = json_get_int(json_result, "blocks")+1;
+//	templ->height = json_get_int(json_result, "blocks")+1;
 	json_value_free(json);
 
 	coind_getauxblock(coind);
@@ -298,6 +303,9 @@ YAAMP_JOB_TEMPLATE *coind_create_template(YAAMP_COIND *coind)
 	templ->created = time(NULL);
 	templ->value = json_get_int(json_result, "coinbasevalue");
 	templ->height = json_get_int(json_result, "height");
+
+	debuglog("Height in template %d\n", templ->height);
+
 	sprintf(templ->version, "%08x", (unsigned int)json_get_int(json_result, "version"));
 	sprintf(templ->ntime, "%08x", (unsigned int)json_get_int(json_result, "curtime"));
 
@@ -364,7 +372,7 @@ YAAMP_JOB_TEMPLATE *coind_create_template(YAAMP_COIND *coind)
 		sprintf(templ->version, "%08x", nVersion);
 	}
 
-//	debuglog("%s ntime %s\n", coind->symbol, templ->ntime);
+	debuglog("%s ntime %s\n", coind->symbol, templ->ntime);
 //	uint64_t target = decode_compact(json_get_string(json_result, "bits"));
 //	coind->difficulty = target_to_diff(target);
 
@@ -380,6 +388,7 @@ YAAMP_JOB_TEMPLATE *coind_create_template(YAAMP_COIND *coind)
 
 	if(coind->isaux)
 	{
+		debuglog("%s is aux\n", coind->symbol);
 		json_value_free(json);
 		coind_getauxblock(coind);
 		return templ;
@@ -486,14 +495,16 @@ YAAMP_JOB_TEMPLATE *coind_create_template(YAAMP_COIND *coind)
 	if(templ->txmerkles[0])
 		templ->txmerkles[strlen(templ->txmerkles)-1] = 0;
 
-//	debuglog("merkle transactions %d [%s]\n", templ->txcount, templ->txmerkles);
+	debuglog("merkle transactions %d [%s]\n", templ->txcount, templ->txmerkles);
 	ser_string_be2(templ->prevhash_hex, templ->prevhash_be, 8);
 
 	if(!strcmp(coind->symbol, "LBC"))
 		ser_string_be2(templ->claim_hex, templ->claim_be, 8);
 
-	if(!coind->pos)
+	if(!coind->pos){
 		coind_aux_build_auxs(templ);
+		debuglog("Template %s add auxs: %d\n",coind->symbol ,sizeof(templ->auxs));
+	}
 
 	coinbase_create(coind, templ, json_result);
 	json_value_free(json);
@@ -505,7 +516,7 @@ YAAMP_JOB_TEMPLATE *coind_create_template(YAAMP_COIND *coind)
 
 bool coind_create_job(YAAMP_COIND *coind, bool force)
 {
-//	debuglog("create job %s\n", coind->symbol);
+	debuglog("create job %s\n", coind->symbol);
 
 	bool b = rpc_connected(&coind->rpc);
 	if(!b) return false;
@@ -524,7 +535,7 @@ bool coind_create_job(YAAMP_COIND *coind, bool force)
 	if(!templ)
 	{
 		CommonUnlock(&coind->mutex);
-//		debuglog("%s: create job template failed!\n", coind->symbol);
+		debuglog("%s: create job template failed!\n", coind->symbol);
 		return false;
 	}
 
@@ -535,7 +546,7 @@ bool coind_create_job(YAAMP_COIND *coind, bool force)
 		templ->txcount == job_last->templ->txcount &&
 		strcmp(templ->coinb2, job_last->templ->coinb2) == 0)
 	{
-//		debuglog("coind_create_job %s %d same template %x \n", coind->name, coind->height, coind->job->id);
+		debuglog("coind_create_job %s %d same template %x \n", coind->name, coind->height, coind->job->id);
 		if (templ->txcount) {
 			templ->txsteps.clear();
 			templ->txdata.clear();
@@ -550,6 +561,7 @@ bool coind_create_job(YAAMP_COIND *coind, bool force)
 
 	int height = coind->height;
 	coind->height = templ->height-1;
+	debuglog("Coind height:%d\n", coind->height);
 
 	if(height > coind->height)
 	{
@@ -567,7 +579,7 @@ bool coind_create_job(YAAMP_COIND *coind, bool force)
 	if (templ->nbits && !coin_target) coin_target = 0xFFFF000000000000ULL; // under decode_compact min diff
 	coind->difficulty = target_to_diff(coin_target);
 
-//	stratumlog("%s %d diff %g %llx %s\n", coind->name, height, coind->difficulty, coin_target, templ->nbits);
+	stratumlog("%s %d diff %g %llx %s\n", coind->name, height, coind->difficulty, coin_target, templ->nbits);
 
 	coind->newblock = false;
 
@@ -593,7 +605,7 @@ bool coind_create_job(YAAMP_COIND *coind, bool force)
 	g_list_job.AddTail(coind->job);
 	CommonUnlock(&coind->mutex);
 
-//	debuglog("coind_create_job %s %d new job %x\n", coind->name, coind->height, coind->job->id);
+	debuglog("coind_create_job %s %d new job %x\n", coind->name, coind->height, coind->job->id);
 
 	return true;
 }
