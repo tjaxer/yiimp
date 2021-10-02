@@ -115,7 +115,7 @@ void job_unlock_clients(YAAMP_JOB *job)
 bool job_can_mine(YAAMP_JOB *job)
 {
 	if(job->deleted) {
-	       debuglog("Job deleted.\n");	
+	        debuglog("Job %d deleted.\n", job->id);	
 		return false;
 	}
 
@@ -125,7 +125,7 @@ bool job_can_mine(YAAMP_JOB *job)
 	}
 
 	else if(job->coind) {
-		debuglog("Check coind can mine.\n");
+		debuglog("Check coind can mine %s.\n", job->coind->symbol);
 		return coind_can_mine(job->coind);
 	}
 	debuglog("Job cant be mined.\n");

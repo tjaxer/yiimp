@@ -400,7 +400,7 @@ static json_value *rpc_curl_do_call(YAAMP_RPC *rpc, char const *data)
 
 json_value *rpc_curl_call(YAAMP_RPC *rpc, char const *method, char const *params)
 {
-//	debuglog("%s: %s:%d %s\n", __func__, rpc->host, rpc->port, method);
+	debuglog("%s: %s:%d %s\n", __func__, rpc->host, rpc->port, method);
 
 	int s1 = current_timestamp();
 	if (!rpc->CURL) {

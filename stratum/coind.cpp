@@ -92,7 +92,7 @@ bool coind_can_mine(YAAMP_COIND *coind, bool isaux)
 		return false;
 	}
 	if(coind->isaux != isaux) {
-		stratumlog("%s is aux, can`t mine\n", coind->symbol);
+		stratumlog("%s aux=%d, can`t mine\n", coind->symbol, coind->isaux);
 		return false;
 	}
 //	if(isaux && !coind->aux.chainid) return false;

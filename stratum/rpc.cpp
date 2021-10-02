@@ -149,7 +149,7 @@ char *rpc_do_call(YAAMP_RPC *rpc, char const *data)
 	{
 		int bytes = recv(rpc->sock, buffer+bufpos, YAAMP_SMALLBUFSIZE-bufpos-1, 0);
 		if (g_debuglog_rpc) {
-			debuglog("got %s\n", buffer+bufpos);
+			debuglog("got >%s<\n", buffer+bufpos);
 		}
 		if(bytes <= 0)
 		{

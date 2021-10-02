@@ -328,7 +328,7 @@ int main(int argc, char **argv)
 	db_update_algos(db);
 	db_update_coinds(db);
 
-	sleep(10);
+	sleep(1);
 	job_init();
 
 	job_signal();
@@ -341,7 +341,7 @@ int main(int argc, char **argv)
 	pthread_t thread2;
 	pthread_create(&thread2, NULL, stratum_thread, NULL);
 
-	sleep(20);
+	sleep(2);
 
 	while(!g_exiting)
 	{

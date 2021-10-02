@@ -164,8 +164,16 @@ static void client_do_submit(YAAMP_CLIENT *client, YAAMP_JOB *job, YAAMP_JOB_VAL
 		if(!templ->auxs[i]) continue;
 		YAAMP_COIND *coind_aux = templ->auxs[i]->coind;
 
-		if(!coind_aux || !strcmp(coind->symbol, coind_aux->symbol2))
+		if(!coind_aux) 
 			continue;
+
+		debuglog("aux submit start: %s\n", coind_aux->symbol);
+
+		debuglog("aux submit start check: '%s' = '%s': %d\n", coind->symbol, coind_aux->symbol2, strcmp(coind->symbol, coind_aux->symbol2) );
+
+		if(!strcmp(coind->symbol, coind_aux->symbol2))
+			continue;
+		debuglog("aux submit mergemine: %s - %s\n", coind->symbol, coind_aux->symbol2 );
 
 		unsigned char target_aux[1024];
 		binlify(target_aux, coind_aux->aux.target);
@@ -173,6 +181,7 @@ static void client_do_submit(YAAMP_CLIENT *client, YAAMP_JOB *job, YAAMP_JOB_VAL
 		uint64_t coin_target_aux = get_hash_difficulty(target_aux);
 		if(hash_int <= coin_target_aux)
 		{
+			debuglog("aux submit check, target enough: %s\n", coind_aux->symbol);
 			memset(block_hex, 0, block_size);
 
 			strcat(block_hex, submitvalues->coinbase);		// parent coinbase
