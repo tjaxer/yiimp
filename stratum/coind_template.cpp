@@ -22,7 +22,7 @@ void coind_getauxblock(YAAMP_COIND *coind)
 //	coind->aux.height = coind->height+1;
 	coind->aux.chainid = json_get_int(json_result, "chainid");
 
-	const char *p = json_get_string(json_result, "target");
+	const char *p = json_get_string(json_result, "_target");
 	if(p) strcpy(coind->aux.target, p);
 
 	p = json_get_string(json_result, "hash");

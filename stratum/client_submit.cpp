@@ -171,7 +171,7 @@ static void client_do_submit(YAAMP_CLIENT *client, YAAMP_JOB *job, YAAMP_JOB_VAL
 
 		debuglog("aux submit start check: '%s' = '%s': %d\n", coind->symbol, coind_aux->symbol2, strcmp(coind->symbol, coind_aux->symbol2) );
 
-		if(!strcmp(coind->symbol, coind_aux->symbol2))
+		if(strcmp(coind->symbol, coind_aux->symbol2))
 			continue;
 		debuglog("aux submit mergemine: %s - %s\n", coind->symbol, coind_aux->symbol2 );
 
@@ -179,6 +179,7 @@ static void client_do_submit(YAAMP_CLIENT *client, YAAMP_JOB *job, YAAMP_JOB_VAL
 		binlify(target_aux, coind_aux->aux.target);
 
 		uint64_t coin_target_aux = get_hash_difficulty(target_aux);
+		debuglog("aux submit difficulty check hash_int <= coin_target_aux %d <= %d\n", hash_int, coin_target_aux); 
 		if(hash_int <= coin_target_aux)
 		{
 			debuglog("aux submit check, target enough: %s\n", coind_aux->symbol);
