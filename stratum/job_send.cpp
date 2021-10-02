@@ -115,21 +115,21 @@ void job_broadcast(YAAMP_JOB *job)
 	{
 		YAAMP_CLIENT *client = (YAAMP_CLIENT *)li->data;
 		if(client->deleted) {
-			debuglog("Client %d deleted", client->id);
+			debuglog("Client %d deleted\n", client->id);
 			continue;
 		}
 		if(!client->sock) {
-			debuglog("Client %d disconnected", client->id);
+			debuglog("Client %d disconnected\n", client->id);
 			continue;
 		}
 	//	if(client->reconnecting && client->locked) continue;
 
 		if(client->jobid_next != job->id) {
-			debuglog("Client %d next job %d != %d", client->id, client->jobid_next, job->id);
+			debuglog("Client %d next job %d != %d\n", client->id, client->jobid_next, job->id);
 			continue;
 		}
 		if(client->jobid_sent == job->id) {
-			debuglog("Client %d job %d already broadcasted", client->id,  job->id);
+			debuglog("Client %d job %d already broadcasted\n", client->id,  job->id);
 			continue;
 		}
 
